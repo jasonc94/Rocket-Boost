@@ -3,46 +3,77 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Rocket : MonoBehaviour {
+public class Rocket : MonoBehaviour
+{
 
     Rigidbody rigidBody;
     AudioSource audioSource;
+    [SerializeField] float rcsThrust = 200f;
+    [SerializeField] float thrustPower = 20f;
 
-	// initialization
-	void Start () {
+    // initialization
+    void Start()
+    {
         rigidBody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        RocketMovementInput();
-	}
+    }
 
-     void RocketMovementInput()
+    // Update is called once per frame
+    void Update()
     {
-        if (Input.GetKey(KeyCode.W))        // thrust
+        Thrust();
+        Rotate();
+    }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
         {
-            rigidBody.AddRelativeForce(Vector3.up);
+            case "Friendly":
+                print("ok");
+                break;
+            default:
+                print("dead");
+                break;
+        }
+    }
+
+    private void Thrust()
+    {
+        if (Input.GetKey(KeyCode.W))
+        {
+          
+            rigidBody.AddRelativeForce(Vector3.up * thrustPower);
             if (!audioSource.isPlaying)
             {
                 audioSource.Play();
             }
-         
+
             print("thrust");
         }
         else
         {
             audioSource.Stop();
         }
-        if (Input.GetKey(KeyCode.A))        
+    }
+    void Rotate()
+    {
+        rigidBody.freezeRotation = true;    //manual rotation
+
+        float rotationSpeed = Time.deltaTime * rcsThrust;
+        if (Input.GetKey(KeyCode.A))
         {
-            transform.Rotate(Vector3.forward);
+            transform.Rotate(Vector3.forward * rotationSpeed);
             print("left");
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            transform.Rotate(-Vector3.forward);
+            transform.Rotate(-Vector3.forward * rotationSpeed);
         }
+
+        rigidBody.freezeRotation = false;  //physic rotaion
     }
+
+
 }
